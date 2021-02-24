@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "132840037070",
+    "project_id": "the-franchise-group",
+    "storage_bucket": "the-franchise-group.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132840037070:android:84c5f7f0c2badf64808e9f",
+        "android_client_info": {
+          "package_name": "com.example.the_franchise_group"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "132840037070-cqbsbv236keg51k6hjafgogt746udqev.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMHHi7yHBQFaNPMDBwVjbGjyCNOa53jVE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "132840037070-cqbsbv236keg51k6hjafgogt746udqev.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
