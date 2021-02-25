@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:the_franchise_group/providers/auth.dart';
+import 'package:the_franchise_group/widgets/pickers/user_image_picker.dart';
 
 import '../providers/user_details.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class EditUserDetailsScreen extends StatefulWidget {
   static const routeName = '/edit-user';
@@ -15,9 +19,13 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
   final _contactFocusNode = FocusNode();
   final _form = GlobalKey<FormState>();
   var _initValue = true;
+
+  File _userImageFile;
+
   var _initProduct = {
     'name': '',
     'contact': '',
+    'imageUrl': '',
   };
   var _isLoading = false;
 
@@ -25,6 +33,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
     id: '',
     name: '',
     contact: '',
+    imageUrl: '',
   );
 
   @override
@@ -41,6 +50,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
         _initProduct = {
           'name': _editedProduct.name,
           'contact': _editedProduct.contact,
+          'imageUrl': _editedProduct.imageUrl,
         };
       }
     }
@@ -52,6 +62,10 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
   void dispose() {
     _contactFocusNode.dispose();
     super.dispose();
+  }
+
+  void _pickedImage(File image) {
+    _userImageFile = image;
   }
 
   Future<void> _saveForm() async {
@@ -66,6 +80,24 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
     });
 
     if (_editedProduct.id != null) {
+      if (_userImageFile != null) {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('user_image')
+            .child(_editedProduct.id + '.jpg');
+
+        await ref.putFile(_userImageFile).onComplete;
+
+        final url = await ref.getDownloadURL();
+
+        _editedProduct = User(
+          id: _editedProduct.id,
+          name: _editedProduct.name,
+          contact: _editedProduct.contact,
+          imageUrl: url,
+        );
+      }
+
       await Provider.of<UserDetails>(context, listen: false)
           .updateAddress(_editedProduct.id, _editedProduct);
       await _showPriceDialog();
@@ -130,7 +162,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit User'),
+        title: const Text('Edit User Details'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.save),
@@ -161,6 +193,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                           id: _editedProduct.id,
                           name: value,
                           contact: _editedProduct.contact,
+                          imageUrl: _editedProduct.imageUrl,
                         );
                       },
                       validator: (value) {
@@ -183,7 +216,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                         if (value.isEmpty) {
                           return 'Please provide contact.';
                         }
-                        if (value.length < 10) {
+                        if (value.length != 10) {
                           return 'Please provide a valid number.';
                         }
                         return null;
@@ -193,9 +226,14 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                           id: _editedProduct.id,
                           name: _editedProduct.name,
                           contact: value,
+                          imageUrl: _editedProduct.imageUrl,
                         );
                       },
                     ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    UserImagePicker(_pickedImage, _initProduct['imageUrl']),
                   ],
                 ),
               ),

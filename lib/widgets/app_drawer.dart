@@ -32,7 +32,7 @@ class _AppDrawerState extends State<AppDrawer> {
           children: <Widget>[
             AppBar(
               title: Center(
-                child: Text('Welcome'),
+                child: Text('Welcome @TFG'),
               ),
               automaticallyImplyLeading: false,
             ),

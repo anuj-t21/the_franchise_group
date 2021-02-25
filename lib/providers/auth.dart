@@ -9,7 +9,7 @@ class Auth with ChangeNotifier {
   DateTime _expiryDate;
   String _userId;
   bool _isLog = false;
-  bool _isFirst = false;
+  bool _isFirst = true;
   Timer _authTimer;
 
   bool get isAuth {
@@ -53,7 +53,6 @@ class Auth with ChangeNotifier {
 //        throw HttpException(responseData['error']['message']);
       }
 
-      _isFirst = true;
       _isLog = true;
       _token = responseData['idToken'];
       _userId = responseData['localId'];
@@ -71,9 +70,11 @@ class Auth with ChangeNotifier {
       final userData = json.encode({
         'isLog': this._isLog,
         'userId': this._userId,
+        'isFirst': this._isFirst,
       });
       print('done');
       prefs.setString('userData', userData);
+      prefs.setBool('isFirst', this._isFirst);
     } catch (error) {
       throw error;
     }
@@ -96,16 +97,27 @@ class Auth with ChangeNotifier {
     }
     final extractedUserData =
         json.decode(prefs.getString('userData')) as Map<String, Object>;
-
-    final expiryDate = DateTime.parse(extractedUserData['expiryDate']);
-
-    if (expiryDate.isBefore(DateTime.now())) {
-      return false;
-    }
+//
+//    final expiryDate = DateTime.parse(extractedUserData['expiryDate']);
+//
+//    if (expiryDate.isBefore(DateTime.now())) {
+//      return false;
+//    }
 
     this._isLog = extractedUserData['isLog'];
     this._userId = extractedUserData['userId'];
     notifyListeners();
+    return true;
+  }
+
+  Future<bool> tryIntro() async {
+    if (_isLog && !_isFirst) {
+      return false;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    this._isFirst = prefs.getBool('isFirst');
+
     return true;
   }
 
@@ -118,8 +130,10 @@ class Auth with ChangeNotifier {
       _authTimer = null;
     }
     _isLog = false;
+    _isFirst = false;
     final prefs = await SharedPreferences.getInstance();
-    prefs.clear();
+    prefs.remove('userData');
+//    prefs.clear();
     notifyListeners();
   }
 

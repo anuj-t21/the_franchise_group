@@ -6,57 +6,57 @@ class User {
   final String id;
   final String name;
   final String contact;
+  final String imageUrl;
 
   User({
     @required this.id,
     @required this.name,
     @required this.contact,
+    @required this.imageUrl,
   });
 }
 
 class UserDetails with ChangeNotifier {
-  User _user = User(
-    id: '',
-    name: '',
-    contact: '',
-  );
+  User _user;
   //final String authToken;
   final String userId;
 
-  UserDetails(this.userId);
+  UserDetails(this.userId, this._user);
 
   User get user {
     print('reachhhhhh');
-    print(_user.name);
+//    print(_user.name);
     return _user;
   }
 
-//  Future<void> fetchUser() async {
-//    print('111');
+  Future<void> fetchUser() async {
+    print('111');
+    final url =
+        'https://the-franchise-group-default-rtdb.firebaseio.com/user/$userId.json';
 //    final url =
-//        'https://the-franchise-group-default-rtdb.firebaseio.com/user/$userId.json';
-////    final url =
-////        'https://store-f24d4.firebaseio.com/finalOrder/$userId/address.json';
-//    //'?auth=$authToken';
-//    final response = await http.get(url);
-////    final User loadedUser;
-//    final extractedData = json.decode(response.body) as Map<String, dynamic>;
-//    if (extractedData == null) {
-//      return;
-//    }
-//    extractedData.forEach((userId, userValue) {
-//      _user = User(
-//        id: userId,
-//        name: userValue['name'],
-//        contact: userValue['contact'],
-//      );
-//    });
-//    notifyListeners();
-//  }
+//        'https://store-f24d4.firebaseio.com/finalOrder/$userId/address.json';
+    //'?auth=$authToken';
+    final response = await http.get(url);
+//    final User loadedUser;
+    print(response.body);
+    final extractedData = json.decode(response.body) as Map<String, dynamic>;
+    if (extractedData == null) {
+      return;
+    }
+    print(extractedData);
+    extractedData.forEach((userId, userValue) {
+      _user = User(
+          id: userId,
+          name: userValue['name'],
+          contact: userValue['contact'],
+          imageUrl: userValue['imageUrl']);
+    });
+    notifyListeners();
+  }
 
   Future<void> addUser(User user) async {
     print('reach');
-    final timeStamp = DateTime.now();
+//    final timeStamp = DateTime.now();
     final url =
         'https://the-franchise-group-default-rtdb.firebaseio.com/user/$userId/.json';
 //    final url =
@@ -67,6 +67,7 @@ class UserDetails with ChangeNotifier {
       body: json.encode({
         'name': user.name,
         'contact': user.contact,
+        'imageUrl': '',
       }),
     );
 
@@ -74,6 +75,7 @@ class UserDetails with ChangeNotifier {
       id: json.decode(response.body)['name'],
       name: user.name,
       contact: user.contact,
+      imageUrl: '',
     );
 
     print(_user.name);
@@ -82,12 +84,13 @@ class UserDetails with ChangeNotifier {
 
   Future<void> updateAddress(String id, User newUser) async {
     final urlUpdate =
-        'https://the-franchise-group-default-rtdb.firebaseio.com/user/$userId/.json';
+        'https://the-franchise-group-default-rtdb.firebaseio.com/user/$userId/$id/.json';
     await http.patch(
       urlUpdate,
       body: json.encode({
         'name': newUser.name,
         'contact': newUser.contact,
+        'imageUrl': newUser.imageUrl,
       }),
     );
     _user = newUser;

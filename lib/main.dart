@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:the_franchise_group/providers/user_details.dart';
 import 'package:the_franchise_group/screens/edit_user_details.dart';
 import 'package:the_franchise_group/screens/home_screen.dart';
@@ -8,7 +9,9 @@ import './providers/auth.dart';
 import 'package:the_franchise_group/screens/auth_screen.dart';
 import 'package:the_franchise_group/screens/intro_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -41,7 +44,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider<Auth, UserDetails>(
           update: (ctx, auth, previousAddress) => UserDetails(
             auth.userId,
-//            previousAddress == null ? null : previousAddress.user,
+            previousAddress == null ? null : previousAddress.user,
           ),
         ),
       ],
@@ -57,10 +60,18 @@ class MyApp extends StatelessWidget {
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
           home:
-//          auth.isFirst
+//          !auth.isFirst
 //              ?
               auth.isAuth
-                  ? IntroScreen()
+                  ? FutureBuilder(
+                      future: auth.tryIntro(),
+                      builder: (ctx, authResultSnapshot) =>
+                          authResultSnapshot.connectionState ==
+                                  ConnectionState.waiting
+                              ? SplashScreen()
+                              : auth.isFirst
+                                  ? IntroScreen()
+                                  : HomeScreen())
                   : FutureBuilder(
                       future: auth.tryAutoLogin(),
                       builder: (ctx, authResultSnapshot) =>
@@ -69,8 +80,8 @@ class MyApp extends StatelessWidget {
                               ? SplashScreen()
                               : AuthScreen()
 //                          auth.isFirst
-//                                  ? AuthScreen()
-//                                  : IntroScreen(),
+//                                  ? IntroScreen()
+//                                  : AuthScreen(),
                       )
 //              : IntroScreen()
           ,

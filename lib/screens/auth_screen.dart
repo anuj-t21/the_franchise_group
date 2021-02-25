@@ -245,7 +245,7 @@ class _AuthCardState extends State<AuthCard> {
                             if (value.isEmpty) {
                               return 'This is a mandatory field.';
                             }
-                            if (value.length > 10) {
+                            if (value.length != 10) {
                               return 'Please enter valid number.';
                             }
                             return null;
